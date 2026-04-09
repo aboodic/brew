@@ -89,7 +89,8 @@ module Cask
           Manpage,
           PostflightBlock,
           Zap,
-        ].each_with_index.flat_map { |classes, i| Array(classes).map { |c| [c, i] } }.to_h
+          # Optimization: use `with_object` to avoid allocating intermediate arrays like `flat_map { ... }.to_h` does
+        ].each_with_index.with_object({}) { |(classes, i), hash| Array(classes).each { |c| hash[c] = i } }
       end
 
       def <=>(other)
