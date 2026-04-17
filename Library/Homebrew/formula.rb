@@ -1960,9 +1960,11 @@ class Formula
   }
   def std_go_args(output: bin/name, ldflags: nil, gcflags: nil, tags: nil)
     args = ["-trimpath", "-o=#{output}"]
-    args += ["-tags=#{Array(tags).join(" ")}"] if tags
-    args += ["-ldflags=#{Array(ldflags).join(" ")}"] if ldflags
-    args += ["-gcflags=#{Array(gcflags).join(" ")}"] if gcflags
+    # Bolt: Replaced `args += [...]` with `args.push(...)` to avoid allocating
+    # temporary arrays and reduce GC overhead.
+    args.push("-tags=#{Array(tags).join(" ")}") if tags
+    args.push("-ldflags=#{Array(ldflags).join(" ")}") if ldflags
+    args.push("-gcflags=#{Array(gcflags).join(" ")}") if gcflags
     args
   end
 
