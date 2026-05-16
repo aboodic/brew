@@ -286,8 +286,9 @@ module GitHub
       # rubocop:enable Style/FormatStringToken
 
       token = credentials
-      args += ["--header", "Authorization: token #{token}"] if credentials_type != :none
-      args += ["--header", "X-GitHub-Api-Version:2022-11-28"]
+      # Use `push` instead of `+=` to avoid allocating new array objects and copying elements.
+      args.push("--header", "Authorization: token #{token}") if credentials_type != :none
+      args.push("--header", "X-GitHub-Api-Version:2022-11-28")
 
       require "tempfile"
       data_tmpfile = nil
@@ -301,8 +302,7 @@ module GitHub
       end
 
       if data_binary_path.present?
-        args += ["--data-binary", "@#{data_binary_path}"]
-        args += ["--header", "Content-Type: application/gzip"]
+        args.push("--data-binary", "@#{data_binary_path}", "--header", "Content-Type: application/gzip")
       end
 
       headers_tmpfile = Tempfile.new("github_api_headers", HOMEBREW_TEMP)
@@ -310,12 +310,12 @@ module GitHub
         if data_tmpfile
           data_tmpfile.write data
           data_tmpfile.close
-          args += ["--data", "@#{data_tmpfile.path}"]
+          args.push("--data", "@#{data_tmpfile.path}")
 
-          args += ["--request", request_method.to_s] if request_method
+          args.push("--request", request_method.to_s) if request_method
         end
 
-        args += ["--dump-header", T.must(headers_tmpfile.path)]
+        args.push("--dump-header", T.must(headers_tmpfile.path))
 
         require "utils/curl"
         result = Utils::Curl.curl_output("--location", url.to_s, *args, secrets: [token])
