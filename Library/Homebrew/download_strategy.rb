@@ -651,13 +651,19 @@ class CurlDownloadStrategy < AbstractFileDownloadStrategy
   def _curl_args
     args = []
 
-    args += ["-b", meta.fetch(:cookies).map { |k, v| "#{k}=#{v}" }.join(";")] if meta.key?(:cookies)
+    if meta.key?(:cookies)
+      # Performance optimization: using `<<` avoids temporary array allocations
+      # caused by `+=` and `[...]` creation.
+      args << "-b" << meta.fetch(:cookies).map { |k, v| "#{k}=#{v}" }.join(";")
+    end
 
-    args += ["-e", meta.fetch(:referer)] if meta.key?(:referer)
+    args << "-e" << meta.fetch(:referer) if meta.key?(:referer)
 
-    args += ["--user", meta.fetch(:user)] if meta.key?(:user)
+    args << "--user" << meta.fetch(:user) if meta.key?(:user)
 
-    args += meta.fetch(:headers, []).flat_map { |h| ["--header", h.strip] }
+    # Performance optimization: using `each` with `<<` avoids intermediate
+    # array allocations compared to `flat_map` combined with `+=`.
+    meta.fetch(:headers, []).each { |h| args << "--header" << h.strip }
 
     args
   end
