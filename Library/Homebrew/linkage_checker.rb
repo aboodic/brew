@@ -272,7 +272,10 @@ class LinkageChecker
       next true if Formula[full_name].bin.directory?
 
       name = full_name.split("/").last
-      @brewed_dylibs.keys.map { |l| l.split("/").last }.include?(name)
+      # BOLT OPTIMIZATION: Avoid intermediate array allocations and string splitting.
+      # Using `.each_key.any?` with `.end_with?` avoids allocating keys,
+      # arrays from `.split`, and the final mapped array.
+      @brewed_dylibs.each_key.any? { |l| l == name || l.end_with?("/#{name}") }
     end
 
     # Remove no_linkage dependencies from unnecessary_deps since they're expected not to have linkage
