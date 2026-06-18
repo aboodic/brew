@@ -437,10 +437,6 @@ module Homebrew
       return if formula.deprecated? &&
                 formula.deprecation_reason != DeprecateDisable::FORMULA_DEPRECATE_DISABLE_REASONS[:versioned_formula]
 
-      return if Homebrew::SimulateSystem.simulating_or_running_on_linux? && formula.tap&.audit_exception(
-        :linux_versioned_dependencies_conflicts_allowlist, formula.name
-      )
-
       problem <<~EOS
         #{formula.full_name} contains conflicting version recursive dependencies:
           #{version_conflicts.to_a.join ", "}
