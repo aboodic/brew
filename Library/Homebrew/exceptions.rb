@@ -724,7 +724,7 @@ class ErrorDuringExecution < RuntimeError
 
   sig { returns(String) }
   def stderr
-    Array(output).select { |type,| type == :stderr }.map(&:last).join
+    Array(output).filter_map { |type, line| line if type == :stderr }.join
   end
 end
 
@@ -799,7 +799,7 @@ class CyclicDependencyError < RuntimeError
   def initialize(strongly_connected_components)
     super <<~EOS
       The following packages contain cyclic dependencies:
-        #{strongly_connected_components.select { |packages| packages.count > 1 }.map(&:to_sentence).join("\n  ")}
+        #{strongly_connected_components.filter_map { |packages| (packages.count > 1) ? packages.to_sentence : nil }.join("\n  ")}
     EOS
   end
 end
