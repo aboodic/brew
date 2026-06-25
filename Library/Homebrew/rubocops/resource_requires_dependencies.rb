@@ -27,7 +27,8 @@ module RuboCop
               if (dep = node.arguments.first).hash_type?
                 dep_types = dep.values.first
                 dep_types = dep_types.array_type? ? dep_types.values : [dep_types]
-                dep.keys.first.str_content if dep_types.select(&:sym_type?).map(&:value).include?(:build)
+                # ⚡ Bolt: Use `any?` instead of `select.map.include?` to short-circuit
+                dep.keys.first.str_content if dep_types.any? { |t| t.sym_type? && t.value == :build }
               else
                 dep.str_content
               end
