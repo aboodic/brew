@@ -651,13 +651,13 @@ class CurlDownloadStrategy < AbstractFileDownloadStrategy
   def _curl_args
     args = []
 
-    args += ["-b", meta.fetch(:cookies).map { |k, v| "#{k}=#{v}" }.join(";")] if meta.key?(:cookies)
+    args.push("-b", meta.fetch(:cookies).map { |k, v| "#{k}=#{v}" }.join(";")) if meta.key?(:cookies)
 
-    args += ["-e", meta.fetch(:referer)] if meta.key?(:referer)
+    args.push("-e", meta.fetch(:referer)) if meta.key?(:referer)
 
-    args += ["--user", meta.fetch(:user)] if meta.key?(:user)
+    args.push("--user", meta.fetch(:user)) if meta.key?(:user)
 
-    args += meta.fetch(:headers, []).flat_map { |h| ["--header", h.strip] }
+    meta.fetch(:headers, []).each { |h| args.push("--header", h.strip) }
 
     args
   end
