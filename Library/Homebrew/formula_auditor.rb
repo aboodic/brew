@@ -392,10 +392,6 @@ module Homebrew
       return unless @core_tap
       return if formula.tap&.audit_exception :versioned_dependencies_conflicts_allowlist, formula.name
 
-      # The number of conflicts on Linux is absurd.
-      # TODO: remove this and check these there too.
-      return if Homebrew::SimulateSystem.simulating_or_running_on_linux?
-
       # Skip the versioned dependencies conflict audit for *-staging branches.
       # This will allow us to migrate dependents of formulae like Python or OpenSSL
       # gradually over separate PRs which target a *-staging branch. See:
